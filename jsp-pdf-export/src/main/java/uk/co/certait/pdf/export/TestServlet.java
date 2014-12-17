@@ -54,10 +54,22 @@ public class TestServlet extends HttpServlet {
 		doGet(request, response);
 	}
 
+	/**
+	 * 
+	 * @param request
+	 * 
+	 * @return True if PDF requested rather than JSP.
+	 */
 	protected boolean isPdfRequested(HttpServletRequest request) {
 		return StringUtils.equals(request.getParameter(PDF_RESPONSE_KEY), "true");
 	}
 
+	/**
+	 * 
+	 * @param request
+	 * 
+	 * @return The query String for use with the PDF export link. All parameters in the initial JSP request appended. 
+	 */
 	protected String generatePdfExportUrl(HttpServletRequest request) {
 		StringBuilder builder = new StringBuilder();
 		builder.append(PDF_RESPONSE_KEY).append("=true");
@@ -73,6 +85,7 @@ public class TestServlet extends HttpServlet {
 			SAXException, ParserConfigurationException, DocumentException {
 
 		// custom response write: writes the processed JSP to an HTML String
+		// see : http://valotas.com/get-output-of-jsp-or-servlet-response/
 		CharArrayWriterResponse customResponse = new CharArrayWriterResponse(response);
 		request.getRequestDispatcher("/pages/output.jsp").forward(request, customResponse);
 		String html = customResponse.getOutput();
