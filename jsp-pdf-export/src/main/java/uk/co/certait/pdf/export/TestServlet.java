@@ -72,23 +72,25 @@ public class TestServlet extends HttpServlet {
 	protected void streamPDf(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException,
 			SAXException, ParserConfigurationException, DocumentException {
 
+		// custom response write: writes the processed JSP to an HTML String
 		CharArrayWriterResponse customResponse = new CharArrayWriterResponse(response);
 		request.getRequestDispatcher("/pages/output.jsp").forward(request, customResponse);
-
-		DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 		String html = customResponse.getOutput();
-		byte [] data = html.getBytes();
-		Document doc = builder.parse(new ByteArrayInputStream(data));
+		byte[] data = html.getBytes();
 
+		// send the generated HTML to XhtmlRenderer
+		DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+		Document doc = builder.parse(new ByteArrayInputStream(data));
 		ITextRenderer renderer = new ITextRenderer();
 		renderer.setDocument(doc, null);
 		renderer.layout();
 
+		// stream the generated PDF to the client
 		OutputStream out = response.getOutputStream();
 		response.setContentType("application/pdf");
 		response.setHeader("Content-disposition", "attachment; filename=export.pdf");
 		response.setContentLength(data.length);
-		
+
 		renderer.createPDF(out);
 		out.flush();
 		out.close();
